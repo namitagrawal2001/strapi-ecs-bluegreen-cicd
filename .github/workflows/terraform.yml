@@ -1,6 +1,12 @@
 name: Terraform Infrastructure
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - "terraform/**"
+
   workflow_dispatch:
     inputs:
       action:
@@ -43,13 +49,8 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
-        if: github.event.inputs.action == 'plan'
         run: terraform plan
 
-      - name: Terraform Plan Before Apply
-        if: github.event.inputs.action == 'apply'
-        run: terraform plan
-
-      - name: Terraform Apply
-        if: github.event.inputs.action == 'apply'
+      - name: Terraform Apply (only on manual apply)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply'
         run: terraform apply -auto-approve
