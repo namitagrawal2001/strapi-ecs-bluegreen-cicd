@@ -5,9 +5,9 @@
       "TargetService": {
         "Type": "AWS::ECS::Service",
         "Properties": {
-          "TaskDefinition": "TASK_DEFINITION_PLACEHOLDER",
+          "TaskDefinition": "arn:aws:ecs:ap-south-1:663959447043:task-definition/namit-app-cluster:6",
           "LoadBalancerInfo": {
-            "ContainerName": "namit-container",
+            "ContainerName": "namit-strapi-container",
             "ContainerPort": 1337
           }
         }

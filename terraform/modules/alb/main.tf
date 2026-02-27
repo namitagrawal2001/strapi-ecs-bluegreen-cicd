@@ -22,7 +22,7 @@ resource "aws_lb_target_group" "blue" {
     
     path                = "/"
     protocol            = "HTTP"
-    matcher             = "200-299"
+    matcher             = "200-399"
     interval            = 30
     timeout             = 5
     healthy_threshold   = 2
@@ -40,7 +40,7 @@ resource "aws_lb_target_group" "green" {
   health_check {
     path                = "/"
     protocol            = "HTTP"
-    matcher             = "200-299"
+    matcher             = "200-399"
     interval            = 30
     timeout             = 5
     healthy_threshold   = 2

@@ -1,0 +1,6 @@
+{
+  "revisionType": "AppSpecContent",
+  "appSpecContent": {
+    "content": "{\"version\":1,\"Resources\":[{\"TargetService\":{\"Type\":\"AWS::ECS::Service\",\"Properties\":{\"TaskDefinition\":\"arn:aws:ecs:ap-south-1:663959447043:task-definition/namit-app-cluster:6\",\"LoadBalancerInfo\":{\"ContainerName\":\"namit-strapi-container\",\"ContainerPort\":1337}}}}]}"
+  }
+}

@@ -51,7 +51,7 @@ variable "app_image" {
 variable "execution_role_arn" {
   description = "The ARN of the IAM role for ECS task execution."
   type        = string
-  default     = "arn:aws:iam::663959447043:role/ecs_fargate_taskRole"
+  default     = "arn:aws:iam::663959447043:role/ecsTaskExecutionRole"
 
 }
 
