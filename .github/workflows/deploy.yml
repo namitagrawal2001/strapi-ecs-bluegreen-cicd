@@ -94,14 +94,25 @@ jobs:
              '.Resources[0].TargetService.Properties.TaskDefinition = $TASK_DEF' \
              appspec.json > appspec-final.json
 
+      - name: Create revision.json
+        run: |
+          APP_SPEC=$(jq -c . appspec-final.json)
+
+          cat <<EOF > revision.json
+          {
+            "revisionType": "AppSpecContent",
+            "appSpecContent": {
+              "content": "$APP_SPEC"
+            }
+          }
+          EOF
+
       - name: Trigger CodeDeploy deployment
         run: |
-          APP_SPEC=$(cat appspec-final.json | jq -c .)
-
           DEPLOYMENT_ID=$(aws deploy create-deployment \
             --application-name $CODEDEPLOY_APP \
             --deployment-group-name $CODEDEPLOY_GROUP \
-            --revision revisionType=AppSpecContent,appSpecContent="{content='$APP_SPEC'}" \
+            --revision file://revision.json \
             --query deploymentId \
             --output text)
 
