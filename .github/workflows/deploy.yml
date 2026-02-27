@@ -96,13 +96,13 @@ jobs:
 
       - name: Create revision.json
         run: |
-          jq -c . appspec-final.json > appspec-compact.json
+          APP_SPEC_CONTENT=$(cat appspec-final.json | jq -c . | sed 's/"/\\"/g')
 
           cat <<EOF > revision.json
           {
             "revisionType": "AppSpecContent",
             "appSpecContent": {
-              "content": $(cat appspec-compact.json)
+              "content": "$APP_SPEC_CONTENT"
             }
           }
           EOF
