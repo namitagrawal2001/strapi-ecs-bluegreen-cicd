@@ -1,164 +1,183 @@
-# 🚀 Task-10: Blue/Green Deployment using ECS + CodeDeploy
+🚀 Strapi Deployment on AWS ECS (Fargate) with Blue-Green CI/CD
+📌 Overview
 
-## 📌 Overview
+This project demonstrates a production-ready deployment of a Strapi application on AWS ECS Fargate, fully managed using Terraform and automated with GitHub Actions.
 
-This project implements **Blue/Green Deployment** for a Strapi application running on **AWS ECS Fargate**, fully provisioned using **Terraform**.
+It implements a Blue-Green deployment strategy using AWS CodeDeploy, ensuring zero downtime during updates.
 
-The goal of this task is to achieve:
+🏗 Architecture
 
-- ✅ Zero-downtime deployments
-- ✅ Safe production releases
-- ✅ Automatic rollback on failure
-- ✅ Canary traffic shifting
+Client
+⬇
+Application Load Balancer (ALB)
+⬇
+Amazon ECS (Fargate) – Strapi Container
+⬇
+Amazon RDS (PostgreSQL)
 
----
+🧰 Tech Stack
 
-# 🏗 Architecture
+AWS ECS (Fargate)
 
-- Internet
-          ↓
-- Application Load Balancer (ALB)
-          ↓
+Amazon RDS (PostgreSQL)
 
-         | |
-- Blue Target Group Green Target Group
-         | |
-- ECS Task Set (Blue) ECS Task Set (Green)
+Application Load Balancer
 
+AWS CodeDeploy (Blue-Green Deployment)
 
+Amazon ECR
 
-Deployment traffic shifting is controlled by **AWS CodeDeploy**.
+Terraform (Infrastructure as Code)
 
----
+Docker
 
-# 🔵🟢 Deployment Strategy
+GitHub Actions (CI/CD)
 
-We use the predefined configuration:
+📂 Project Structure
+.
+├── app/                        # Strapi application
+├── terraform/                  # Infrastructure as Code
+│   ├── modules/
+│   ├── main.tf
+│   ├── variables.tf
+│   └── outputs.tf
+├── .github/workflows/          # CI/CD pipelines
+├── appspec.json                # CodeDeploy configuration
+└── README.md
+⚙ Infrastructure Provisioning
+Initialize Terraform
+cd terraform
+terraform init
+Review Execution Plan
+terraform plan
+Deploy Infrastructure
+terraform apply
 
+This provisions:
 
-### How It Works
+VPC and Subnets
 
-1. A new ECS task definition revision is created.
-2. CodeDeploy launches a new **Green task set**.
-3. 10% traffic is shifted to Green.
-4. System waits 5 minutes.
-5. If healthy → 100% traffic shifts to Green.
-6. Blue tasks are terminated after 5 minutes.
-7. If unhealthy → automatic rollback to Blue.
+Security Groups
 
----
+Application Load Balancer
 
-# 📂 Infrastructure Components
+Blue & Green Target Groups
 
-## 1️⃣ ECS (Fargate)
+ECS Cluster and Service
 
-- Launch Type: FARGATE
-- Deployment Controller: CODE_DEPLOY
-- Task Definition includes:
-  - CPU & Memory
-  - Container Image
-  - Environment Variables
-  - Logging Configuration
+Amazon RDS PostgreSQL instance
 
----
+CodeDeploy Application and Deployment Group
 
-## 2️⃣ Application Load Balancer
+🔄 Blue-Green Deployment Strategy
 
-- Listener: Port 80 (HTTP)
-- Two Target Groups:
-  - Blue (Current Production)
-  - Green (New Version)
+Deployment workflow:
 
-The ALB listener is modified dynamically during deployment.
+Code is pushed to GitHub.
 
----
+GitHub Actions builds Docker image.
 
-## 3️⃣ CodeDeploy Configuration
+Image is pushed to Amazon ECR.
 
-- Deployment Type: BLUE_GREEN
-- Traffic Control: Enabled
-- Canary Strategy: 10% for 5 minutes
-- Auto Rollback: Enabled
-- Blue termination delay: 5 minutes
+New ECS task definition revision is created.
 
----
+CodeDeploy launches a replacement task set.
 
-## 🔁 End-to-End Deployment Flow
+Traffic is shifted gradually (Canary strategy).
 
-### Step 1: Image Update
-A new Docker image is pushed to ECR.
+On success → full traffic shift.
 
-### Step 2: Task Revision
-ECS registers a new task definition revision.
+On failure → automatic rollback.
 
-### Step 3: Green Task Launch
-CodeDeploy creates a new task set attached to the Green target group.
+This ensures zero downtime and safer releases.
 
-### Step 4: Canary Traffic Shift
-Traffic distribution:
-- 90% → Blue
-- 10% → Green
+🗄 Database Configuration
 
-### Step 5: Health Monitoring
-ALB health checks validate application health.
+The application uses Amazon RDS PostgreSQL for persistent storage.
 
-### Step 6: Full Traffic Shift
-If healthy:
-- 100% → Green
+ECS task definition includes environment variables:
 
-### Step 7: Blue Termination
-After wait time:
-- Blue tasks are terminated
-- Green becomes primary
+DATABASE_HOST
 
----
+DATABASE_PORT
 
-# 🔄 Automatic Rollback
+DATABASE_NAME
 
-If deployment fails:
+DATABASE_CLIENT
 
-- Traffic shifts back to Blue
-- Green tasks are stopped
-- System remains stable
-- No downtime occurs
+DATABASE_USERNAME
 
-Rollback triggers on:
-- Failed health checks
-- Deployment failure events
-- Container crashes
+DATABASE_PASSWORD
 
----
+This ensures secure and production-ready data management.
 
-# 🛠 Terraform Resources Used
+🩺 Health Check Configuration
 
-- aws_ecs_cluster
-- aws_ecs_service
-- aws_lb
-- aws_lb_listener
-- aws_lb_target_group
-- aws_codedeploy_app
-- aws_codedeploy_deployment_group
-- aws_iam_role
+ALB Target Group Health Check:
 
-Infrastructure is written in **modular Terraform structure**.
+Path: /
 
----
+Matcher: 200-399
 
-# 🎯 Key Learning Outcomes
+Port: 1337
 
-- Understanding Blue/Green deployments in ECS
-- Traffic shifting using ALB listener rules
-- Canary deployment strategies
-- Automatic rollback handling
-- Production-grade CI/CD design
+This allows redirect responses (302) to be treated as healthy, ensuring stable service routing.
 
----
+🔐 Security Design
 
-# 🚀 Result
+RDS is not publicly accessible.
 
-This setup ensures:
+Database access restricted via Security Groups.
 
-- Zero downtime deployments
-- Safe production updates
-- Controlled release strategy
-- Enterprise-level DevOps implementation
+ECS tasks communicate with RDS inside private network.
+
+No direct internet exposure to database.
+
+🚀 CI/CD Pipeline
+
+GitHub Actions automates:
+
+AWS authentication
+
+Docker image build
+
+Push to ECR
+
+ECS task definition update
+
+CodeDeploy deployment trigger
+
+Deployment monitoring
+
+This creates a fully automated release workflow.
+
+🧹 Destroy Infrastructure
+
+To remove all provisioned resources:
+
+terraform destroy -auto-approve
+📈 Key Highlights
+
+Infrastructure fully managed with Terraform
+
+Blue-Green zero-downtime deployment
+
+Production-ready database setup
+
+Secure networking configuration
+
+Fully automated CI/CD pipeline
+
+Scalable containerized architecture
+
+🎯 What This Project Demonstrates
+
+Cloud architecture design
+
+Infrastructure as Code best practices
+
+Containerized deployment strategies
+
+Production-grade AWS setup
+
+Automated DevOps workflow
